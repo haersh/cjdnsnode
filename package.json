@@ -6,7 +6,7 @@
     "cjdnsadmin": "~0.0.0",
     "cjdnsann": "~0.1.0",
     "cjdnskeys": "~0.1.0",
-    "cjdnsniff": "~0.1.0",
+    "cjdnsniff": "~0.2.6",
     "cjdnsplice": "~0.2.0",
     "msgpack5": "^3.4.1",
     "node-dijkstra": "~2.2.0",
