@@ -356,7 +356,9 @@ const handleAnnounce = (ctx, annBin, fromNode, fromDb) => {
 const onSubnodeMessage = (ctx, msg, cjdnslink) => {
     if (!msg.contentBenc.sq) { return; }
     if (!msg.routeHeader.version || !msg.routeHeader.publicKey) {
-        console.log("message from " + msg.routeHeader.ip + " with missing key or version");
+        if (msg.routeHeader.ip) {
+            console.log("message from " + msg.routeHeader.ip + " with missing key or version");
+        }
         return;
     }
     if (msg.contentBenc.sq.toString('utf8') === 'gr') {
@@ -400,6 +402,8 @@ const onSubnodeMessage = (ctx, msg, cjdnslink) => {
     } else if (msg.contentBenc.sq.toString('utf8') === 'pn') {
         msg.contentBenc.recvTime = now();
         msg.contentBenc.stateHash = new Buffer(new Array(64).fill(0));
+        // can't possibly be a ctrl message but needed to please flow.
+        if (!msg.routeHeader.ip) { throw new Error(); }
         if (msg.routeHeader.ip in ctx.nodesByIp) {
             const n = ctx.nodesByIp[msg.routeHeader.ip];
             if (n.mut.stateHash) {
