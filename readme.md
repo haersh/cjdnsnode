@@ -32,6 +32,6 @@ Remember to use correct ip value in config!
 ```
 $ npm install
 $ cp config.example.js config.js
-$ sudo -u postgres psql < initdb.sql`
+$ sudo -u postgres psql < initdb.sql
 $ npm run start
 ```
