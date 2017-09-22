@@ -65,15 +65,17 @@ const getRoute = (ctx, src, dst) => {
     if (!ctx.mut.dijkstra) {
         ctx.mut.routeCache = {};
         const dijkstra = ctx.mut.dijkstra = new Dijkstra();
-        for (const nip in ctx.nodesByIp) {
-            const links = ctx.nodesByIp[nip].inwardLinksByIp;
-            const l = {};
-            for (const pip in links) { l[pip] = linkValue(links[pip]); }
-            ctx.mut.dijkstra.addNode(nip, l);
-        }
+        ctx.nodesByIp
+            .forEach( nip => {
+                const links = ctx.nodesByIp[nip].inwardLinksByIp;
+                const l = {};
+                links.forEach( pip => l[pip] = linkValue(links[pip]) )
+                ctx.mut.dijkstra.addNode(nip, l);
+            })
     }
 
-    const cachedEntry = ctx.mut.routeCache[dst.ipv6 + '|' + src.ipv6];
+    const cachedEntry = ctx.mut.routeCache[`${dst.ipv6}|${src.ipv6}`]
+
     if (typeof(cachedEntry) !== 'undefined') {
         return cachedEntry;
     }
@@ -126,16 +128,11 @@ const nodeAnnouncementHash = (node) => {
                 .createHash('sha512')
                 .update(carry)
                 .update(node.mut.announcements[i].binary)
-                .digest()
-         )
-
-            
-            
+                .digest())
         }
-        node.mut.stateHash = carry;
-    }
-    return carry;
-};
+        node.mut.stateHash = carry
+    return carry
+}
 
 const peersFromAnnouncement = (ann) => 
     ann.entities.filter((x) => (x.type === 'Peer')) /*:Array<any>*/ 
