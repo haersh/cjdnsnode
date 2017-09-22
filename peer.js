@@ -12,29 +12,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-'use strict';
-const WebSocket = require('ws');
-const Msgpack = require('msgpack5');
-const nThen = require('nthen');
-/*::const Http = require('http');*///flow
 
+ // TODO: Add persistand data structure.
+
+'use strict';
+
+import * as _cosnst_ from './ServerEnv/constValues'
+const WebSocket = require('ws')
+const Msgpack = require('msgpack5')
+const nThen = require('nthen');
+
+// WTF??
 const NOFUNC = ()=>{};
 
-const DROP_AFTER_MS = 60000;
-const PING_AFTER_MS = 20000;
-const PING_CYCLE_MS = 5000;
-
+// TODO: Move to separate file
 const now = () => (+new Date());
 
-const socketSendable = function (socket) {
-    return socket && socket.readyState === 1;
-};
+// Somehow checker
+const isSocketOk = ( socket ) =>  socket && socket.readyState === 1
+const isSocketBad = ( socket ) => !socket || socket.readyState !== 1
 
 const dropPeer = (ctx, peer) => {
-    try { throw new Error(); } catch (e) { console.log(e.stack); }
-    if (peer.socket.readyState !== 2 /* WebSocket.CLOSING */
-        && peer.socket.readyState !== 3 /* WebSocket.CLOSED */)
-    {
+    // [2 ,3] stands for socket state bounds
+    // 2 - in disconnection process
+    // 3 - terminated
+    if ( [2,3].indexOf(peer.socket.readyState) === -1 ) {
         try {
             peer.socket.close();
         } catch (e) {
@@ -46,21 +48,26 @@ const dropPeer = (ctx, peer) => {
             }
         }
     }
-    const idx = ctx.peers.indexOf(peer);
-    if (idx !== -1) {
+    if (ctx.peers.indexOf(peer) !== -1) {
+        // WTF idx?
         ctx.peers.splice(idx, 1);
     }
 };
 
-const sendPeerMsg = function (ctx, peer, msg) {
-    if (!socketSendable(peer.socket)) { return; }
+const sendPeerMsg = (ctx, peer, msg) => {
+    if (isSocketBad(peer.socket)) { return; }
+
+};
+
+// This is unit function with side effects. Actually sends message to peer;
+const applySending = ( message = '' ) => {
     try {
-        peer.socket.send(ctx.msgpack.encode(msg));
+        peer.socket.send(ctx.msgpack.encode(message));
     } catch (e) {
         console.log(e.stack);
         dropPeer(ctx, peer);
     }
-};
+}
 
 const handleMessage = (ctx, peer, message) => {
     const msg = ctx.msgpack.decode(message);
@@ -201,7 +208,7 @@ const addAnn = (ctx, hash, binary) => {
 const pingCycle = (ctx) => {
     ctx.peers.forEach((p) => {
         const lag = now() - p.mut.timeOfLastMessage;
-        if (lag > DROP_AFTER_MS) {
+        if (lag > _const_.DROP_AFTER_MS) {
             dropPeer(ctx, p);
         } else if (lag > PING_AFTER_MS && typeof(ctx.pings[p.id]) === 'undefined') {
             const seq = ctx.mut.seq++;
@@ -231,7 +238,8 @@ const create = module.exports.create = () => {
             onAnnounce: NOFUNC,
         }
     });
-    ctx.mut.pingCycle = setInterval(() => { pingCycle(ctx); }, PING_CYCLE_MS);
+
+    ctx.mut.pingCycle = setInterval(() => { pingCycle(ctx); }, _cosnst_.PING_CYCLE_MS);
 
     return {
         connectTo: (url /*:string*/) => { connectTo(ctx, url); },
