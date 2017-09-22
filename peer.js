@@ -56,11 +56,11 @@ const dropPeer = (ctx, peer) => {
 
 const sendPeerMsg = (ctx, peer, msg) => {
     if (isSocketBad(peer.socket)) { return; }
-
+    applySending(ctx, peer, msg)
 };
 
 // This is unit function with side effects. Actually sends message to peer;
-const applySending = ( message = '' ) => {
+const applySending = ( ctx, peer, message = '' ) => {
     try {
         peer.socket.send(ctx.msgpack.encode(message));
     } catch (e) {
