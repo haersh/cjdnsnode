@@ -48,8 +48,8 @@ interface IPingRecord {
 
 interface IWsContext {
     peers: Array<Peer>,
-    pings: Object<String, IPingRecord>,
-    annByHash: Object<String, Buffer>,
+    pings: {string, IPingRecord},
+    annByHash: {string, Buffer},
     msgpack: msgpack5.MessagePack,
     version: Number,
     mut: IMut

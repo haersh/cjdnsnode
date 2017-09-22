@@ -17,7 +17,7 @@
 
 'use strict';
 
-import * as _cosnst_ from './ServerEnv/constValues'
+import * as _const_ from './ServerEnv/constValues'
 const WebSocket = require('ws')
 const Msgpack = require('msgpack5')
 const nThen = require('nthen');
@@ -210,7 +210,7 @@ const pingCycle = (ctx) => {
         const lag = now() - p.mut.timeOfLastMessage;
         if (lag > _const_.DROP_AFTER_MS) {
             dropPeer(ctx, p);
-        } else if (lag > PING_AFTER_MS && typeof(ctx.pings[p.id]) === 'undefined') {
+        } else if (lag > _const_.PING_AFTER_MS && typeof(ctx.pings[p.id]) === 'undefined') {
             const seq = ctx.mut.seq++;
             ctx.pings[p.id] = { seq: seq, time: now() };
             sendPeerMsg(ctx, p, [seq, 'PING']);
@@ -239,7 +239,7 @@ const create = module.exports.create = () => {
         }
     });
 
-    ctx.mut.pingCycle = setInterval(() => { pingCycle(ctx); }, _cosnst_.PING_CYCLE_MS);
+    ctx.mut.pingCycle = setInterval(() => { pingCycle(ctx); }, _const_.PING_CYCLE_MS);
 
     return {
         connectTo: (url /*:string*/) => { connectTo(ctx, url); },
