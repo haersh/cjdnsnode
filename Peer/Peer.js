@@ -15,11 +15,11 @@
 
 
  import { Peer } from './Interfaces';
-
+// This variable should be not used directly
  let _wsHandlerInstance_: WsHandler | null = null;
 
  // This is singleton. It is only one instance of this class could be provided.
- class WsHandler {
+ export default class WsHandler {
     constructor(){
         // If somehow somewere somebody try to create new instance existed will be provided
          _wsHandlerInstance_ !== null 
@@ -27,7 +27,3 @@
             : _wsHandlerInstance_ = this
     }
  }
-
-const a = new WsHandler()
-const b = new WsHandler()
-const c = new WsHandler()
