@@ -11,14 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+//@flow
 
 // typescript !!! THIS IS TYPESCRIPT TYPINGS !!!
 // interfase for message repack
  import Msgpack from 'msgpack5'
 
  // DUNNO What is it later will solve this mistery
- interface IMut {
+
+ interface IDummyMut {
+    timeOfLastMessage?: Date
+ }
+
+
+ interface IMut extends IDummyMut {
     seq: Date,
     peerIdSeq: Number,
     pingCycle?: Number,
@@ -32,7 +38,7 @@ interface IPeer {
     id: Number,
     socket: Socket,
     outgoing: Boolean,
-    mut: Mut
+    mut : IMut
 }
 
 interface IPingRecord {
