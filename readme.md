@@ -28,9 +28,10 @@ echo -n 'd1:q2:gr3:src54:3fdqgz2vtqb0wx02hhvx3wjmjqktyt567fcuvj3m72vw5u6ubu70.k3
 
 
 Well for development needs I have to install babel. Be pleased to use
-
+Remember to use correct ip value in config!
 ```
 $ npm install
 $ cp config.example.js config.js
+$ sudo -u postgres psql < initdb.sql`
 $ npm run start
 ```
