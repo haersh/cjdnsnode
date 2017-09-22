@@ -7,6 +7,11 @@ simply connect to it's socket and listen for all of the updates sent right to yo
 Snode allows dumping of it's internal state using TCP/JSON (replication socket) and it allows
 querying to get a path between any 2 nodes given by their keys using UDB/Benc.
 
+Please pay attention. In current version you have to install postgre also. 
+Hope in next stable release it will be stand alone application with DB module extention.
+
+So. Please read config. Proper readme will be commited soon.
+
 To start the node:
 
 ```bash
@@ -22,7 +27,7 @@ echo -n 'd1:q2:gr3:src54:3fdqgz2vtqb0wx02hhvx3wjmjqktyt567fcuvj3m72vw5u6ubu70.k3
 ```
 
 
-Well for development needs I have to install babel so. Be pleased to use
+Well for development needs I have to install babel. Be pleased to use
 
 ```
 $ npm install
