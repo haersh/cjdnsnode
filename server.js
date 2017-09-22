@@ -53,9 +53,7 @@ const mkLink = (annPeer, ann) => {
     });
 };
 
-const linkValue = (link) => {
-    return 1;
-};
+const linkValue = (link) =>  1;
 
 const getRoute = (ctx, src, dst) => {
     if (!src || !dst) { return null; }
@@ -119,30 +117,38 @@ const getRoute = (ctx, src, dst) => {
 };
 
 const nodeAnnouncementHash = (node) => {
-    let carry = new Buffer(64).fill(0);
+    let carry = new Buffer(64).fill(0)
     if (node) {
-        for (let i = node.mut.announcements.length - 1; i >= 0; i--) {
-            const hash = Crypto.createHash('sha512').update(carry);
-            carry = hash.update(node.mut.announcements[i].binary).digest();
+        node.mut.announcements
+        .reverse()
+        .forEach( ( v, i ) =>
+            carry = Crypto
+                .createHash('sha512')
+                .update(carry)
+                .update(node.mut.announcements[i].binary)
+                .digest()
+         )
+
+            
+            
         }
         node.mut.stateHash = carry;
     }
     return carry;
 };
 
-const peersFromAnnouncement = (ann) => {
-    return (ann.entities.filter((x) => (x.type === 'Peer')) /*:Array<any>*/ );
-};
+const peersFromAnnouncement = (ann) => 
+    ann.entities.filter((x) => (x.type === 'Peer')) /*:Array<any>*/ 
 
 const encodingSchemeFromAnnouncement = (ann) => {
-    const scheme /*:any*/ = ann.entities.filter((x) => (x.type === 'EncodingScheme'))[0];
-    return scheme ? scheme.scheme : undefined;
+    const scheme /*:any*/ = ann.entities.find( x => x.type === 'EncodingScheme' )
+    return scheme ? scheme.scheme : undefined
 };
 
 const versionFromAnnouncement = (ann) => {
-    const ver /*:any*/ = ann.entities.filter((x) => (x.type === 'Version'))[0];
-    return ver ? ver.version : undefined;
-};
+    const ver /*:any*/ = ann.entities.find((x) => (x.type === 'Version'))
+    return ver ? ver.version : undefined
+}
 
 const addAnnouncement = (ctx, node, ann, annHash) => {
     const time = Number('0x' + ann.timestamp);
