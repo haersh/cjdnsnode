@@ -29,31 +29,30 @@ const Http = require('http');
 const Database = require('./database');
 const Peer = require('./peer');
 
+import * as _const_ from './ServerEnv/constValues'
 
-const MS_MINUTE = 1000 * 60;
-const KEEP_TABLE_CLEAN_CYCLE = 4 * 60 * MS_MINUTE;
-const AGREED_TIMEOUT_MS = 10 * MS_MINUTE;
-const MAX_CLOCKSKEW_MS = (1000 * 10);
-const MAX_GLOBAL_CLOCKSKEW_MS = (1000 * 60 * 60 * 20);
-const GLOBAL_TIMEOUT_MS = MAX_GLOBAL_CLOCKSKEW_MS + AGREED_TIMEOUT_MS;
+
 
 const now = () => (+new Date());
 
 const mkLink = (annPeer, ann) => {
-    if (!ann) { throw new Error(); }
-    return Object.freeze({
-        label: annPeer.label,
-        mtu: annPeer.mtu,
-        drops: annPeer.drops,
-        latency: annPeer.latency,
-        penalty: annPeer.penalty,
-        encodingFormNum: annPeer.encodingFormNum,
-        flags: annPeer.flags,
-        time: Number('0x' + ann.timestamp)
-    });
+    ann 
+        ? Object.freeze({
+                label: annPeer.label,
+                mtu: annPeer.mtu,
+                drops: annPeer.drops,
+                latency: annPeer.latency,
+                penalty: annPeer.penalty,
+                encodingFormNum: annPeer.encodingFormNum,
+                flags: annPeer.flags,
+                time: Number('0x' + ann.timestamp)
+          })
+        : new Error()
 };
 
-const linkValue = (link) =>  1;
+// potentialy buggy
+// returns always 1
+const linkValue = _ => 1
 
 const getRoute = (ctx, src, dst) => {
     if (!src || !dst) { return null; }
@@ -242,7 +241,7 @@ const handleAnnounce = (ctx, annBin, fromNode, fromDb) => {
 
     let maxClockSkew;
     if (fromNode) {
-        maxClockSkew = MAX_CLOCKSKEW_MS;
+        maxClockSkew = _const_.MAX_CLOCKSKEW_MS;
         if (!ctx.mut.selfNode) { throw new Error(); }
         if (ann && ann.snodeIp !== ctx.mut.selfNode.ipv6) {
             console.log("announcement from peer which is one of ours");
@@ -250,7 +249,7 @@ const handleAnnounce = (ctx, annBin, fromNode, fromDb) => {
             ann = undefined;
         }
     } else {
-        maxClockSkew = MAX_GLOBAL_CLOCKSKEW_MS;
+        maxClockSkew = _const_.MAX_GLOBAL_CLOCKSKEW_MS;
         if (!fromDb && ctx.mut.selfNode && ann && ann.snodeIp === ctx.mut.selfNode.ipv6) {
             console.log("announcement meant for other snode");
             replyError = "wrong_snode";
@@ -477,7 +476,6 @@ const testSrv = (ctx) => {
         ents.shift();
         if (ents[0] === 'path') {
             ents.shift();
-            //res.end(JSON.stringify(ents));
             const srcIp = ents[0];
             const tarIp = ents[1];
             const src = ctx.nodesByIp[srcIp];
@@ -529,7 +527,7 @@ const testSrv = (ctx) => {
 const keepTableClean = (ctx) => {
     setInterval(() => {
         console.log("keepTableClean()");
-        const minTime = now() - GLOBAL_TIMEOUT_MS;
+        const minTime = now() - _const_.GLOBAL_TIMEOUT_MS;
         for (const nodeIp in ctx.nodesByIp) {
             const node = ctx.nodesByIp[nodeIp];
             const n = now();
@@ -539,18 +537,19 @@ const keepTableClean = (ctx) => {
                 continue;
             }
         }
-    }, KEEP_TABLE_CLEAN_CYCLE);
+    }, _const_.KEEP_TABLE_CLEAN_CYCLE);
 };
 
 const loadDb = (ctx, cb) => {
     console.log('gc');
     nThen((waitFor) => {
         ctx.db._db.on('notification', (n) => { console.log(n); });
-        const minTs = now() - GLOBAL_TIMEOUT_MS;
+        const minTs = now() - _const_.GLOBAL_TIMEOUT_MS;
         ctx.db.garbageCollect(minTs, waitFor(() => {
             console.log("Garbage collection complete");
         }));
-    }).nThen((waitFor) => {
+    })
+    .nThen((waitFor) => {
         console.log('gc3');
         ctx.db.getAllMessages((msgBytes) => {
             handleAnnounce(ctx, msgBytes, false, true);
@@ -590,7 +589,8 @@ const main = () => {
 
     nThen((waitFor) => {
         loadDb(ctx, waitFor());
-    }).nThen((waitFor) => {
+    })
+    .nThen((waitFor) => {
         //keepTableClean(ctx);
         if (config.connectCjdns) { service(ctx); }
         testSrv(ctx);
